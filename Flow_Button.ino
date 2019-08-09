@@ -21,7 +21,7 @@ int loopCounter = 0;
 String WirelessSSID = "?"; 
 String WirelessKey = "?";
 String FlowUrl = "?";
-String FlowThumprint = "?"; //without any spaces
+String FlowThumbprint = "?"; //without any spaces
 /**** TODO END  ****/
 
 void setup() {
@@ -70,7 +70,7 @@ void callFlowButton() {
   }
 
   HTTPClient http;    //Declare object of class HTTPClient
-  http.begin(FlowUrl, FlowThumprint);     //Specify request destination
+  http.begin(FlowUrl, FlowThumbprint);     //Specify request destination
               
   Serial.println("Sending request");
   int httpCode = http.GET();
