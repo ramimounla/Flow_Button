@@ -1,6 +1,8 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
+#include <WiFiClientSecureBearSSL.h>
 
+  
 /*
   ESP8266 Blink by Simon Peter
   Blink the blue LED on the ESP-01 module
@@ -21,11 +23,10 @@ int loopCounter = 0;
 String WirelessSSID = "?"; 
 String WirelessKey = "?";
 String FlowUrl = "?";
-String FlowThumbprint = "?"; //without any spaces
 /**** TODO END  ****/
 
 void setup() {
-  Serial.begin(115200);                 //Serial connection
+  Serial.begin(9600);                 //Serial connection
   Serial.println("\nStart setup" );
   pinMode(LED_BUILTIN, OUTPUT);     // Initialize the LED_BUILTIN pin as an output
   doubleBlink();
@@ -47,18 +48,14 @@ void loop() {
     doubleBlink();
   }
   else {
-    Serial.println("Pin is HIGH" );
     digitalWrite(LED_BUILTIN, HIGH);
   }
 
   loopCounter++;
   if (loopCounter == 40) {
-    digitalWrite(LED_BUILTIN, HIGH);  // Turn the LED off by making the voltage HIGH
-    delay(100);                      // Wait for two seconds (to demonstrate the active low LED)
-    digitalWrite(LED_BUILTIN, LOW);   // Turn the LED on (Note that LOW is the voltage level
-    delay(100);                      // Wait for a second
-    digitalWrite(LED_BUILTIN, HIGH);  // Turn the LED off by making the voltage HIGH
+    singleBlink();
     loopCounter = 0;
+    Serial.println("Waiting for input..." );
   }
   delay(100);
 }
@@ -69,8 +66,11 @@ void callFlowButton() {
     tryToConnect();
   }
 
+  std::unique_ptr<BearSSL::WiFiClientSecure>client(new BearSSL::WiFiClientSecure);
+  client->setInsecure();
+  
   HTTPClient http;    //Declare object of class HTTPClient
-  http.begin(FlowUrl, FlowThumbprint);     //Specify request destination
+  http.begin(*client, FlowUrl);     //Specify request destination
               
   Serial.println("Sending request");
   int httpCode = http.GET();
@@ -95,20 +95,19 @@ void tryToConnect() {
   Serial.println(WiFi.localIP());
 }
 
+void singleBlink(){
+  digitalWrite(LED_BUILTIN, HIGH);  // Turn the LED off by making the voltage HIGH
+  delay(100);                      // Wait for two seconds (to demonstrate the active low LED)
+  digitalWrite(LED_BUILTIN, LOW);   // Turn the LED on (Note that LOW is the voltage level
+  delay(100);                      // Wait for a second
+  digitalWrite(LED_BUILTIN, HIGH);  // Turn the LED off by making the voltage HIGH
+}
 void quadBlink(){
   doubleBlink();
   doubleBlink();
 }
 
 void doubleBlink() {
-  digitalWrite(LED_BUILTIN, HIGH);  // Turn the LED off by making the voltage HIGH
-  delay(100);                      // Wait for two seconds (to demonstrate the active low LED)
-  digitalWrite(LED_BUILTIN, LOW);   // Turn the LED on (Note that LOW is the voltage level
-  delay(100);                      // Wait for a second
-  digitalWrite(LED_BUILTIN, HIGH);  // Turn the LED off by making the voltage HIGH
-  delay(100);                      // Wait for two seconds (to demonstrate the active low LED)
-  digitalWrite(LED_BUILTIN, LOW);   // Turn the LED on (Note that LOW is the voltage level
-  delay(100);
-  digitalWrite(LED_BUILTIN, HIGH);  // Turn the LED off by making the voltage HIGH
-
+  singleBlink();
+  singleBlink();
 }
